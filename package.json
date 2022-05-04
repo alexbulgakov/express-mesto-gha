@@ -1,0 +1,20 @@
+{
+  "name": "express-mesto-gha",
+  "version": "1.0.0",
+  "description": "[![Tests for sprint 13](https://github.com/alexunnt/express-mesto-gha/actions/workflows/tests-13-sprint.yml/badge.svg)](https://github.com/alexunnt/express-mesto-gha/actions/workflows/tests-13-sprint.yml)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexunnt/express-mesto-gha.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alexunnt/express-mesto-gha/issues"
+  },
+  "homepage": "https://github.com/alexunnt/express-mesto-gha#readme"
+}
