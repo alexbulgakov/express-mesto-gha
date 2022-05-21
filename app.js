@@ -25,7 +25,7 @@ app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
 app.all('*', (req, res) => {
-  res.status(404).send({ message: 'Такой адрес не существует' });
+  res.status(404).send({ message: 'Неправильный путь' });
 });
 
 app.listen(PORT, () => {
