@@ -24,6 +24,10 @@ app.use((req, res, next) => {
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
+app.all('*', (req, res) => {
+  res.status(404).send({ message: 'Такой адрес не существует' });
+});
+
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
 });
