@@ -1,3 +1,8 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+
+const { JWT_SECRET } = process.env;
 const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
@@ -29,9 +34,13 @@ module.exports.createUser = (req, res) => {
     name, about, avatar, email, password,
   } = req.body;
 
-  User.create({
-    name, about, avatar, email, password,
-  })
+  const createUser = (hash) => User.create({
+    name, about, avatar, email, password: hash,
+  });
+
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => createUser(hash))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -75,4 +84,20 @@ module.exports.updateAvatar = (req, res) => {
       }
       return res.status(500).send({ message: err.message });
     });
+};
+
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: '7d',
+      });
+      res.cookie('jwt', token, {
+        maxAge: 3600000,
+        httpOnly: true,
+      });
+      res.send({ token });
+    })
+    .catch(next);
 };
