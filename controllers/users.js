@@ -31,7 +31,7 @@ module.exports.getUser = (req, res) => {
 
 module.exports.getMe = (req, res) => {
   const { _id } = req.user;
-  User.find(_id)
+  User.find({ _id })
     .then((user) => res.send(user))
     .catch((err) => res.status(500).send({ message: err.message }));
 };
@@ -103,6 +103,7 @@ module.exports.login = (req, res, next) => {
       res.cookie('jwt', token, {
         maxAge: 3600000,
         httpOnly: true,
+        sameSite: true,
       });
       res.send({ token });
     })

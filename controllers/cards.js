@@ -23,21 +23,34 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  const removeCard = () => {
+    Card.findByIdAndRemove(req.params.cardId)
+      .then((card) => res.send(card))
+      .catch((err) => {
+        if (err.name === 'CastError') {
+          return res.status(400).send({
+            message: 'Некорректный id карточки',
+          });
+        }
+        return res.status(500).send({ message: err.message });
+      });
+  };
+
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'Такой карточки не существует' });
-      }
-      return res.send(card);
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(400).send({
-          message: 'Некорректный id карточки',
+        return res.status(404).send({
+          message: 'Карточки не существует',
         });
       }
-      return res.status(500).send({ message: err.message });
-    });
+      if (req.user._id === card.owner.toString()) {
+        return removeCard();
+      }
+      return res
+        .status(403)
+        .send({ message: 'Попытка удалить чужую карточку' });
+    })
+    .catch((err) => res.status(500).send({ message: err.message }));
 };
 
 module.exports.likeCard = (req, res) => {
