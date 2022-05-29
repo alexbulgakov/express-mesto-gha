@@ -29,6 +29,13 @@ module.exports.getUser = (req, res) => {
     });
 };
 
+module.exports.getMe = (req, res) => {
+  const { _id } = req.user;
+  User.find(_id)
+    .then((user) => res.send(user))
+    .catch((err) => res.status(500).send({ message: err.message }));
+};
+
 module.exports.createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
