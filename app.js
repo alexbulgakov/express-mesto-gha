@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const errorHandler = require('./errors/errorHandler');
 require('dotenv').config();
 
 const { PORT } = process.env;
@@ -27,6 +28,8 @@ app.use('/cards', require('./routes/cards'));
 app.all('*', (req, res) => {
   res.status(404).send({ message: 'Неправильный путь' });
 });
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
