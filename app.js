@@ -5,7 +5,6 @@ const { errors } = require('celebrate');
 const { celebrate, Joi } = require('celebrate');
 const auth = require('./middlewares/auth');
 const errorHandler = require('./errors/errorHandler');
-const NotFoundError = require('./errors/NotFoundError');
 const { createUser, login } = require('./controllers/users');
 const errorWays = require('./routes/errorWays');
 
@@ -59,11 +58,8 @@ app.use(errorWays);
 // app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
-app.all('*', (req, res, next) => {
-  next(new NotFoundError('Неверный путь'));
-});
-
 app.use(errors());
+
 app.use(errorHandler);
 
 app.listen(PORT, () => {

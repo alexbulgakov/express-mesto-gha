@@ -9,16 +9,16 @@ const ConflictError = require('../errors/ConflictError');
 const ValidationError = require('../errors/ValidationError');
 const UnauthorizedError = require('../errors/UnauthorizedError');
 
-module.exports.getUsers = (req, res, next) => {
+module.exports.getUser = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send(users))
     .catch((err) => next(err));
 };
 
-module.exports.getUser = (req, res, next) => {
+module.exports.getUserId = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
-      if (!user) {
+      if (!user._id) {
         next(new NotFoundError('Пользователь не найден'));
       }
       res.status(200).send(user);

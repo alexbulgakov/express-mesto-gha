@@ -5,14 +5,14 @@ const auth = require('../middlewares/auth');
 const regExp = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/;
 
 const {
-  getUsers,
   getUser,
+  getUserId,
   updateAvatar,
   updateProfile,
   getMe,
 } = require('../controllers/users');
 
-router.get('/', auth, getUsers);
+router.get('/', auth, getUser);
 router.get('/me', auth, getMe);
 router.get(
   '/:userId',
@@ -22,7 +22,7 @@ router.get(
       userId: Joi.string().required().length(24).hex(),
     }),
   }),
-  getUser,
+  getUserId,
 );
 router.patch(
   '/me',
