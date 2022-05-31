@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
+const auth = require('../middlewares/auth');
 
 const {
   getCards,
@@ -11,9 +12,10 @@ const {
 
 const regExp = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/;
 
-router.get('/', getCards);
+router.get('/', auth, getCards);
 router.post(
   '/',
+  auth,
   celebrate({
     body: Joi.object().keys({
       name: Joi.string().required().min(2).max(30),
@@ -24,6 +26,7 @@ router.post(
 );
 router.delete(
   '/:cardId',
+  auth,
   celebrate({
     params: Joi.object().keys({
       cardId: Joi.string().required().length(24).hex(),
@@ -33,6 +36,7 @@ router.delete(
 );
 router.put(
   '/:cardId/likes',
+  auth,
   celebrate({
     params: Joi.object().keys({
       cardId: Joi.string().required().length(24).hex(),
@@ -42,6 +46,7 @@ router.put(
 );
 router.delete(
   '/:cardId/likes',
+  auth,
   celebrate({
     params: Joi.object().keys({
       cardId: Joi.string().required().length(24).hex(),
