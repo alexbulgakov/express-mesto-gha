@@ -9,7 +9,7 @@ const errorHandler = require('./errors/errorHandler');
 const NotFoundError = require('./errors/NotFoundError');
 require('dotenv').config();
 
-const { PORT } = process.env;
+const { PORT = 3000 } = process.env;
 
 const app = express();
 
