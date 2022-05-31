@@ -22,7 +22,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.use('/', require('./routes/auth'));
 
-app.use(auth);
+app.use(auth());
 
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
@@ -32,7 +32,7 @@ app.all('*', (req, res, next) => {
 });
 
 app.use(errors());
-app.use(errorHandler);
+app.use(errorHandler());
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
