@@ -5,31 +5,21 @@ const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const { JWT_SECRET = 'JWT_SECRET' } = process.env;
 
-const handleAuthenticationError = (next) => {
-  next(new UnauthorizedError('Требуется авторицация'));
-};
-
-const tokenVerification = (token) => {
-  try {
-    return jwt.verify(token, JWT_SECRET);
-  } catch (err) {
-    return '';
-  }
-};
-
 module.exports = (req, res, next) => {
-  const token = req.cookies.jwt || req.headers.authorization.replace('Bearer ', '');
+  const { authorization } = req.headers;
 
-  if (!token) {
-    return handleAuthenticationError(next);
+  if (!authorization || !authorization.startsWith('Bearer ')) {
+    next(new UnauthorizedError('Требуется авторизация'));
   }
+  const token = String(req.headers.authorization).replace('Bearer ', '');
 
-  const payload = tokenVerification(token);
+  let payload;
 
-  if (!payload) {
-    handleAuthenticationError(next);
+  try {
+    payload = jwt.verify(token, JWT_SECRET);
+  } catch (err) {
+    return next(new UnauthorizedError('Требуется авторизация'));
   }
-
   req.user = payload;
   return next();
 };

@@ -5,16 +5,22 @@ const ForbiddenError = require('../errors/ForbiddenError');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.send(cards))
-    .catch(next);
+    .then((cards) => res.status(200).send(cards))
+    .catch((err) => next(err));
 };
 
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
-  const owner = req.user._id;
+  const ownerId = req.user._id;
 
-  Card.create({ name, link, owner })
-    .then((card) => res.send(card))
+  Card.create({ name, link, owner: ownerId })
+    .then((card) => {
+      if (!card) {
+        next(new ValidationError('В метод создания карточки переданы некорректные данные'));
+      }
+
+      res.status(200).send({ data: card });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new ValidationError('В метод создания карточки переданы некорректные данные'));
@@ -39,7 +45,12 @@ module.exports.deleteCard = (req, res, next) => {
       }
       return next(new ForbiddenError('Удаление чужой карточки запрещено'));
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new ValidationError('В метод создания карточки переданы некорректные данные'));
+      }
+      next(err);
+    });
 };
 
 module.exports.likeCard = (req, res, next) => {
@@ -50,11 +61,16 @@ module.exports.likeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        return next(new NotFoundError('Карточка для добавления лайка не найдена'));
+        next(new NotFoundError('Карточка для добавления лайка не найдена'));
       }
-      return res.send(card);
+      res.status(200).send({ data: card });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new ValidationError('В метод создания карточки переданы некорректные данные'));
+      }
+      next(err);
+    });
 };
 
 module.exports.dislikeCard = (req, res, next) => {
@@ -65,9 +81,14 @@ module.exports.dislikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        return next(new NotFoundError('Карточка для удаления лайка не найдена'));
+        next(new NotFoundError('Карточка для удаления лайка не найдена'));
       }
-      return res.send(card);
+      res.status(200).send({ data: card });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new ValidationError('В метод создания карточки переданы некорректные данные'));
+      }
+      next(err);
+    });
 };
