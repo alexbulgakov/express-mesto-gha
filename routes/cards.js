@@ -10,7 +10,7 @@ const {
   dislikeCard,
 } = require('../controllers/cards');
 
-const regExp = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/;
+const regExp = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)/;
 
 router.get('/', auth, getCards);
 router.post(
@@ -29,7 +29,7 @@ router.delete(
   auth,
   celebrate({
     params: Joi.object().keys({
-      cardId: Joi.string().required().length(24).hex(),
+      cardId: Joi.string().hex().length(24),
     }),
   }),
   deleteCard,
@@ -39,7 +39,7 @@ router.put(
   auth,
   celebrate({
     params: Joi.object().keys({
-      cardId: Joi.string().required().length(24).hex(),
+      cardId: Joi.string().hex().length(24),
     }),
   }),
   likeCard,
@@ -49,7 +49,7 @@ router.delete(
   auth,
   celebrate({
     params: Joi.object().keys({
-      cardId: Joi.string().required().length(24).hex(),
+      cardId: Joi.string().hex().length(24),
     }),
   }),
   dislikeCard,
