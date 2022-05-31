@@ -23,7 +23,7 @@ module.exports.createCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError('В метод создания карточки переданы некорректные данные'));
+        next(new ValidationError({ message: err.errorMessage }));
       }
       next(err);
     });
@@ -46,7 +46,7 @@ module.exports.deleteCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new ValidationError('В метод создания карточки переданы некорректные данные'));
+        next(new ValidationError({ message: err.errorMessage }));
       }
       next(err);
     });
@@ -66,7 +66,7 @@ module.exports.likeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new ValidationError('В метод создания карточки переданы некорректные данные'));
+        next(new ValidationError({ message: err.errorMessage }));
       }
       next(err);
     });
@@ -86,7 +86,7 @@ module.exports.dislikeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new ValidationError('В метод создания карточки переданы некорректные данные'));
+        next(new ValidationError({ message: err.errorMessage }));
       }
       next(err);
     });

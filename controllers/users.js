@@ -129,7 +129,7 @@ module.exports.login = (req, res, next) => {
         maxAge: 3600000,
         httpOnly: true,
       });
-      res.status(201).send({ token });
+      res.status(201).send({ message: 'Успешная авторизация', token });
     })
     .catch((err) => {
       if (err.message === 'IncorrectEmail') {
