@@ -1,4 +1,8 @@
 const router = require('express').Router();
+const { celebrate, Joi } = require('celebrate');
+
+const regExp = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/;
+
 const {
   getUsers,
   createUser,
@@ -10,9 +14,43 @@ const {
 
 router.get('/', getUsers);
 router.get('/me', getMe);
-router.get('/:userId', getUser);
-router.post('/', createUser);
-router.patch('/me', updateProfile);
-router.patch('/me/avatar', updateAvatar);
+router.get(
+  '/:userId',
+  getUser,
+  celebrate({
+    params: Joi.object().keys({
+      userId: Joi.string().required().length(24).hex(),
+    }),
+  }),
+);
+router.post(
+  '/',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      about: Joi.string().min(8).required(),
+    }),
+  }),
+  createUser,
+);
+router.patch(
+  '/me',
+  celebrate({
+    body: Joi.object().keys({
+      name: Joi.string().min(2).max(30),
+      about: Joi.string().min(2).max(30),
+    }),
+  }),
+  updateProfile,
+);
+router.patch(
+  '/me/avatar',
+  celebrate({
+    body: Joi.object().keys({
+      avatar: Joi.string().required().pattern(regExp),
+    }),
+  }),
+  updateAvatar,
+);
 
 module.exports = router;
