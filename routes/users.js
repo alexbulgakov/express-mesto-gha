@@ -5,7 +5,6 @@ const regExp = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}
 
 const {
   getUsers,
-  createUser,
   getUser,
   updateAvatar,
   updateProfile,
@@ -22,16 +21,6 @@ router.get(
       userId: Joi.string().required().length(24).hex(),
     }),
   }),
-);
-router.post(
-  '/',
-  celebrate({
-    body: Joi.object().keys({
-      email: Joi.string().required().email(),
-      about: Joi.string().min(8).required(),
-    }),
-  }),
-  createUser,
 );
 router.patch(
   '/me',
