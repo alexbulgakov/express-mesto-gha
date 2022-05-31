@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const UnauthorizedError = require('../errors/UnauthorizedError');
 
-const { JWT_SECRET } = process.env;
+const { JWT_SECRET = 'JWT_SECRET' } = process.env;
 
 const handleAuthenticationError = (next) => {
   next(new UnauthorizedError('Требуется авторицация'));
