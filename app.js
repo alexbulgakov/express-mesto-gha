@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const cookieParser = require('cookie-parser');
-const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const errorHandler = require('./errors/errorHandler');
 const NotFoundError = require('./errors/NotFoundError');
@@ -23,8 +22,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   autoIndex: true,
 });
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.use('/', require('./routes/auth'));
 
 app.use(auth);
 
