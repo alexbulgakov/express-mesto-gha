@@ -3,52 +3,52 @@ const NotFoundError = require('../errors/NotFoundError');
 const ValidationError = require('../errors/ValidationError');
 const ForbiddenError = require('../errors/ForbiddenError');
 
-module.exports.getCards = (req, res, next) => {
+module.exports.getCard = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.status(200).send(cards))
-    .catch((err) => next(err));
+    .then((card) => res.send({ data: card }))
+    .catch(next);
 };
 
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
-  const ownerId = req.user._id;
+  const owner = req.user._id;
+  const likes = [];
 
-  Card.create({ name, link, owner: ownerId })
+  Card.create({
+    name, link, owner, likes,
+  })
     .then((card) => {
-      if (!card) {
-        next(new ValidationError('В метод создания карточки переданы некорректные данные'));
-      }
-
-      res.status(200).send({ data: card });
+      res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError({ message: err.errorMessage }));
+        return next(new ValidationError('Переданы некорректные данные'));
       }
-      next(err);
+      return next(err);
     });
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  const removeCard = () => {
-    Card.findByIdAndRemove(req.params.cardId)
-      .then((card) => res.send(card))
-      .catch(next);
-  };
+  const { cardId } = req.params;
 
-  Card.findById(req.params.cardId)
-    .then((card) => {
-      if (!card) next(new NotFoundError('Карточка не существует'));
-      if (req.user._id === card.owner.toString()) {
-        return removeCard();
-      }
-      return next(new ForbiddenError('Удаление чужой карточки запрещено'));
+  Card.findById(cardId)
+    .orFail(() => {
+      throw new NotFoundError('Карточка с указанным id не найдена');
     })
+    .then((card) => {
+      if (String(req.user._id) !== String(card.owner)) {
+        return next(new ForbiddenError('Удаление чужой карточки запрещено'));
+      }
+      return card.remove()
+        .then(() => res.send({ message: 'Карточка успешно удалена' }));
+    })
+
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new ValidationError({ message: err.errorMessage }));
+        next(new ValidationError('Переданы некорретные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -58,17 +58,20 @@ module.exports.likeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
+    .orFail(() => {
+      throw new NotFoundError('Передан несуществующий id карточки');
+    })
     .then((card) => {
-      if (!card) {
-        next(new NotFoundError('Карточка для добавления лайка не найдена'));
-      }
-      res.status(200).send({ data: card });
+      res.send({ data: card });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new ValidationError({ message: err.errorMessage }));
+      if (err.message === 'NotFound') {
+        next(new NotFoundError('Передан несуществующий id карточки'));
+      } else if (err.name === 'CastError') {
+        next(new ValidationError('Переданы некорретные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -78,16 +81,19 @@ module.exports.dislikeCard = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
+    .orFail(() => {
+      throw new NotFoundError('Передан несуществующий id карточки');
+    })
     .then((card) => {
-      if (!card) {
-        next(new NotFoundError('Карточка для удаления лайка не найдена'));
-      }
-      res.status(200).send({ data: card });
+      res.status(200).send({ card });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new ValidationError({ message: err.errorMessage }));
+      if (err.message === 'NotFound') {
+        next(new NotFoundError('Передан несуществующий id карточки'));
+      } else if (err.name === 'CastError') {
+        next(new ValidationError('Переданы некорретные данные'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };

@@ -4,11 +4,12 @@ const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const { celebrate, Joi } = require('celebrate');
 const auth = require('./middlewares/auth');
-const errorHandler = require('./errors/errorHandler');
 const { createUser, login } = require('./controllers/users');
-const errorWays = require('./routes/errorWays');
+const NotFoundError = require('./errors/NotFoundError');
+const user = require('./routes/users');
+const card = require('./routes/cards');
 
-const regExp = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/;
+const regExp = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
 require('dotenv').config();
 
 const { PORT = 3000 } = process.env;
@@ -25,7 +26,7 @@ app.post(
       name: Joi.string().min(2).max(30),
       about: Joi.string().min(2).max(30),
       avatar: Joi.string().pattern(regExp),
-      email: Joi.string().email().required(),
+      email: Joi.string().required().email(),
       password: Joi.string().required().min(8),
     }),
   }),
@@ -49,18 +50,22 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   autoIndex: true,
 });
 
-// app.use('/', require('./routes/auth'));
+app.use('/', auth, user);
+app.use('/', auth, card);
 
-app.use(auth);
+app.use('*', () => {
+  throw new NotFoundError('Такой страницы не существует');
+});
 
-app.use(errorWays);
-
-// app.use('/users', require('./routes/users'));
-app.use('/cards', require('./routes/cards'));
+app.use((err, _, res, next) => {
+  const { statusCode = 500, message } = err;
+  res.status(statusCode).send(
+    { message: statusCode === 500 ? 'На сервере произошла ошибка' : message },
+  );
+  next();
+});
 
 app.use(errors());
-
-app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);

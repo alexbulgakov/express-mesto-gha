@@ -1,6 +1,5 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
-const auth = require('../middlewares/auth');
 
 const regExp = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)/;
 
@@ -12,21 +11,22 @@ const {
   getMe,
 } = require('../controllers/users');
 
-router.get('/', auth, getUser);
-router.get('/me', auth, getMe);
+router.get('/users', getUser);
+
+router.get('/users/me', getMe);
+
 router.get(
-  '/:userId',
-  auth,
+  '/users/:userId',
   celebrate({
     params: Joi.object().keys({
-      userId: Joi.string().length(24).hex(),
+      userId: Joi.string().length(24).hex().required(),
     }),
   }),
   getUserId,
 );
+
 router.patch(
-  '/me',
-  auth,
+  '/users/me',
   celebrate({
     body: Joi.object().keys({
       name: Joi.string().required().min(2).max(30),
@@ -35,8 +35,9 @@ router.patch(
   }),
   updateProfile,
 );
+
 router.patch(
-  '/me/avatar',
+  '/users/me/avatar',
   celebrate({
     body: Joi.object().keys({
       avatar: Joi.string().required().pattern(regExp),
