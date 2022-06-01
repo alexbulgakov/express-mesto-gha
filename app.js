@@ -10,11 +10,12 @@ const user = require('./routes/users');
 const card = require('./routes/cards');
 
 const regExp = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
-require('dotenv').config();
 
 const { PORT = 3000 } = process.env;
 
 const app = express();
+
+mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -27,7 +28,7 @@ app.post(
       about: Joi.string().min(2).max(30),
       avatar: Joi.string().pattern(regExp),
       email: Joi.string().required().email(),
-      password: Joi.string().required().min(8),
+      password: Joi.string().required(),
     }),
   }),
   createUser,
@@ -38,17 +39,11 @@ app.post(
   celebrate({
     body: Joi.object().keys({
       email: Joi.string().email().required(),
-      password: Joi.string().required().min(8),
+      password: Joi.string().required(),
     }),
   }),
   login,
 );
-
-mongoose.connect('mongodb://localhost:27017/mestodb', {
-  useUnifiedTopology: true,
-  useNewUrlParser: true,
-  autoIndex: true,
-});
 
 app.use('/', auth, user);
 app.use('/', auth, card);
@@ -57,6 +52,8 @@ app.use('*', () => {
   throw new NotFoundError('Такой страницы не существует');
 });
 
+app.use(errors());
+
 app.use((err, _, res, next) => {
   const { statusCode = 500, message } = err;
   res.status(statusCode).send(
@@ -64,8 +61,6 @@ app.use((err, _, res, next) => {
   );
   next();
 });
-
-app.use(errors());
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
