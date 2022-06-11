@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const { celebrate, Joi } = require('celebrate');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 const auth = require('./middlewares/auth');
 const { createUser, login } = require('./controllers/users');
 const NotFoundError = require('./errors/NotFoundError');
@@ -19,6 +20,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(requestLogger);
 
 app.post(
   '/signup',
@@ -47,6 +50,8 @@ app.post(
 
 app.use('/', auth, user);
 app.use('/', auth, card);
+
+app.use(errorLogger);
 
 app.use('*', () => {
   throw new NotFoundError('Такой страницы не существует');
